@@ -54,7 +54,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 output application/json
 ---
 {
-	"message": "Data added successfully to database Yeah",
+	"message": "Data is added successfully to database Yeah",
 	"number of updated records": vars.sizeOfPayload
 }]]></ee:set-payload>
 			</ee:message>
