@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="daaa2d0e-118e-417e-84dd-c433c41dc3c3" >
+		<db:oracle-connection host="localhost" user="system" password="admin123" instance="XE" />
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2d79eb0a-3260-481a-8e00-d3c942815c27" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="c256df4d-d7d5-4680-85fb-3db5f3ad338b" >
+		<file:connection workingDir="D:\New folder (2)" />
+	</file:config>
+	<flow name="bulkFlow" doc:id="b3951db2-fee1-48f9-bbd8-68808442ee99" >
+		<http:listener doc:name="Listener" doc:id="845fa59b-6abc-4a8a-b021-90928819afb5" config-ref="HTTP_Listener_config" path="/bulk_insert"/>
+		<file:read doc:name="Read" doc:id="7bd51a6c-d4c6-4d58-bf14-2faaa41f41fd" config-ref="File_Config" path="D:\New folder (2)\annual-enterprise-survey-2021-financial-year-provisional-csv.csv"/>
+		<ee:transform doc:name="Transform Message" doc:id="d73c1a9b-9218-4bdb-9842-4306664bb902" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sizeOfPayload" ><![CDATA[%dw 2.0
+output application/json
+---
+sizeOf(payload)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="74897d5e-bbc1-4ed2-a288-cc011cb678ee" message="#[sizeOf(payload)]"/>
+		<ee:transform doc:name="Transform Message" doc:id="f09b11d3-3490-423e-8f96-62ae59cd892e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	"Variable_code": payload01.Variable_code,
+	"Variable_name": payload01.Variable_name
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="54fcc294-adf6-4ee4-9e8d-cf475c27ad4d" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into TABLE1_DATA (VARIABLE_CODE, VARIABLE_NAME)values(:Variable_code, :Variable_name)]]></db:sql>
+		</db:bulk-insert>
+		<ee:transform doc:name="Transform Message" doc:id="e51d5fe8-2c0c-4b86-8d44-7258498b1d76" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Data added successfully to database Yeah",
+	"number of updated records": vars.sizeOfPayload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

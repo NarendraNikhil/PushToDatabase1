@@ -1,0 +1,14 @@
+[
+    {
+        "Variable_code": "H01",
+        "Variable_name": "Total income"
+    },
+    {
+        "Variable_code": "H04",
+        "Variable_name": "Sales, government funding, grants and subsidies"
+    },
+    {
+        "Variable_code": "H05",
+        "Variable_name": "Interest, dividends and donations"
+    },
+]

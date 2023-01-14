@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="example" format="json">
+      <types:shape format="weave" example="examples/bulkinsert_example-1.txt"><![CDATA[%dw 2.0
+
+type example = Array<{|  Variable_code: String,   Variable_name: String|} | Null> {"example": "[{\\\"Variable_code\\\":\\\"H01\\\",\\\"Variable_name\\\":\\\"Total income\\\"},{\\\"Variable_code\\\":\\\"H04\\\",\\\"Variable_name\\\":\\\"Sales, government funding, grants and subsidies\\\"},{\\\"Variable_code\\\":\\\"H05\\\",\\\"Variable_name\\\":\\\"Interest, dividends and donations\\\"},null]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#f09b11d3-3490-423e-8f96-62ae59cd892e">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="example"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
